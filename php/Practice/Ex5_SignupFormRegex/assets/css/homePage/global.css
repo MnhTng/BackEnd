@@ -1,0 +1,23 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.4),
+        rgba(0, 0, 0, 0.8)
+    );
+    background-attachment: fixed;
+    overflow: auto;
+}
+
+a {
+    text-decoration: none;
+}
