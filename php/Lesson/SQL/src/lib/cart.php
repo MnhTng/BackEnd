@@ -1,5 +1,5 @@
 <?php
-function add_cart($id, $cat, $code, $sizeChose)
+function add_cart($code, $sizeChose)
 {
     foreach ($_SESSION['product'] as $item) {
         if ($item['pcode'] == $code) {
@@ -16,13 +16,8 @@ function add_cart($id, $cat, $code, $sizeChose)
                         $product['quantity'] += $_POST['quantity'];
                         $product['subtotal'] = $product['quantity'] * ($product['sale'] ? $product['sale'] : $product['price']);
 
-                        global $db;
-                        db_connect($db);
-
                         $where = "id = {$_SESSION['user_id']} AND pcode = '{$code}' AND size = '{$sizeChose}'";
                         db_update('cart', $product, $where);
-
-                        db_close();
                     }
                 } else
                     $checkNewItem = 1;
@@ -44,12 +39,7 @@ function add_cart($id, $cat, $code, $sizeChose)
                     'subtotal' => $_POST['quantity'] * ($item['sale'] ? $item['sale'] : $item['price'])
                 ];
 
-                global $db;
-                db_connect($db);
-
                 db_insert('cart', $newItem);
-
-                db_close();
             }
 
             break;

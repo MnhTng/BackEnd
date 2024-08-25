@@ -15,7 +15,7 @@ function dateRegex($date)
 
 function emailRegex($email)
 {
-    $pattern = "/^([A-Za-z0-9_]{6,32})@gmail(.[A-Za-z]{2,12})+$/";
+    $pattern = "/^([A-Za-z]{2,32})([a-z0-9_]{0,32})@gmail(.[A-Za-z]{2,12})+$/";
     return preg_match($pattern, $email, $matches);
 }
 

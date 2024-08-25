@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/php/Lesson/AdvanceNaviSystem/src/assets/images/logo.png" type="image/x-icon">
+    <link rel="icon" href="/php/Lesson/SQL/src/assets/images/logo.png" type="image/x-icon">
 
     <link rel="stylesheet" href="./src/assets/css/fontawesome/css/all.css">
     <link rel="stylesheet" href="./src/assets/css/login.css">
@@ -66,7 +66,7 @@
                 </svg>
 
                 <script src="https://cdn.lordicon.com/lordicon.js"></script>
-                <lord-icon class="open-pass" src="https://cdn.lordicon.com/vfczflna.json" trigger="loop" delay="4000" stroke="bold" colors="primary:#000000,secondary:#242424" style="width:2.5em;height:2.5em"></lord-icon>
+                <lord-icon class="open-pass" src="https://cdn.lordicon.com/vfczflna.json" trigger="loop" delay="4000" stroke="bold" colors="primary:#fff,secondary:#f5f5f5" style="width:2.5em;height:2.5em"></lord-icon>
             </div>
         </fieldset>
         <div class="error">
@@ -88,7 +88,7 @@
                 </svg>
 
                 <script src="https://cdn.lordicon.com/lordicon.js"></script>
-                <lord-icon class="open-pass" src="https://cdn.lordicon.com/vfczflna.json" trigger="loop" delay="4000" stroke="bold" colors="primary:#000000,secondary:#242424" style="width:2.5em;height:2.5em"></lord-icon>
+                <lord-icon class="open-pass" src="https://cdn.lordicon.com/vfczflna.json" trigger="loop" delay="4000" stroke="bold" colors="primary:#fff,secondary:#f5f5f5" style="width:2.5em;height:2.5em"></lord-icon>
             </div>
         </fieldset>
         <div class="error">

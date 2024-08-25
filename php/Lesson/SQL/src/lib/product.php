@@ -22,9 +22,15 @@ function show_home_product($i)
         <div class='product'>
         <div class='img'>
             <a href='?mod=posts&act=detail&id={$_SESSION['product'][$i]['id']}&cat={$cat}&code={$_SESSION['product'][$i]['pcode']}'>
-                <span class='price'>";
-            echo $_SESSION['product'][$i]['sale'] ? number_format($_SESSION['product'][$i]['sale'], 0, '', ',') . "₫" : number_format($_SESSION['product'][$i]['price'], 0, '', ',') . "₫";
-            echo "
+                <span class='price'>
+                    <span>";
+        echo $_SESSION['product'][$i]['sale'] ? number_format($_SESSION['product'][$i]['sale'], 0, '', ',') . "₫" : number_format($_SESSION['product'][$i]['price'], 0, '', ',') . "₫";
+        echo "
+                    </span>
+                    <span>";
+        echo $_SESSION['product'][$i]['sale'] ? number_format($_SESSION['product'][$i]['sale'], 0, '', ',') . "₫" : number_format($_SESSION['product'][$i]['price'], 0, '', ',') . "₫";
+        echo "
+                    </span>
                 </span>
             </a>
             <img src='{$_SESSION['product'][$i]['image']}' alt='{$_SESSION['product'][$i]['name']} {$_SESSION['product'][$i]['pcode']}'>
@@ -39,9 +45,15 @@ function show_home_product($i)
         <div class='product'>
         <div class='img'>
             <a href='?mod=posts&act=detail&id={$_SESSION['product'][$i]['id']}&code={$_SESSION['product'][$i]['pcode']}'>
-                <span class='price'>";
-            echo $_SESSION['product'][$i]['sale'] ? number_format($_SESSION['product'][$i]['sale'], 0, '', ',') . "₫" : number_format($_SESSION['product'][$i]['price'], 0, '', ',') . "₫";
-            echo "
+                <span class='price'>
+                    <span>";
+        echo $_SESSION['product'][$i]['sale'] ? number_format($_SESSION['product'][$i]['sale'], 0, '', ',') . "₫" : number_format($_SESSION['product'][$i]['price'], 0, '', ',') . "₫";
+        echo "
+                    </span>
+                    <span>";
+        echo $_SESSION['product'][$i]['sale'] ? number_format($_SESSION['product'][$i]['sale'], 0, '', ',') . "₫" : number_format($_SESSION['product'][$i]['price'], 0, '', ',') . "₫";
+        echo "
+                    </span>
                 </span>
             </a>
             <img src='{$_SESSION['product'][$i]['image']}' alt='{$_SESSION['product'][$i]['name']} {$_SESSION['product'][$i]['pcode']}'>
@@ -93,21 +105,41 @@ function get_focus_category($id, $cat)
     }
 }
 
-function show_list_product_by_category($id, $cat)
+function show_list_product_by_category($id, $cat, $page)
 {
+    global $db;
+    db_connect($db);
+
+    $quantityPerPage = 9;
+
+    // Contain id
     if (isset($id) && $id !== 0) {
+        // Contain cat
         if (isset($cat)) {
             $type = explode(', ', $_SESSION['category'][$id - 1]['type']);
+            $totalPost = db_num_rows("SELECT * FROM product as p WHERE p.id = $id AND p.type = '{$type[$cat]}'");
+            $totalPage = ceil($totalPost / $quantityPerPage);
 
-            foreach ($_SESSION['product'] as $item) {
+            $start = ($page - 1) * $quantityPerPage;
+            $sql = "SELECT * FROM product as p WHERE p.id = $id AND p.type = '{$type[$cat]}' LIMIT {$start}, {$quantityPerPage}";
+            $filter = db_fetch_array($sql);
+
+            echo "<div class='product-list hidden-bot'>";
+            foreach ($filter as $item) {
                 if ($item['id'] == $id && $item['type'] == $type[$cat]) {
                     echo "
                     <div class='product'>
                     <div class='img'>
                         <a href='?mod=posts&act=detail&id={$id}&cat={$cat}&code={$item['pcode']}'>
-                            <span class='price'>";
-                        echo $item['sale'] ? number_format($item['sale'], 0, '', ',') . "₫" : number_format($item['price'], 0, '', ',') . "₫";
-                        echo "
+                            <span class='price'>
+                                <span>";
+                    echo $item['sale'] ? number_format($item['sale'], 0, '', ',') . "₫" : number_format($item['price'], 0, '', ',') . "₫";
+                    echo "
+                                </span>
+                                <span>";
+                    echo $item['sale'] ? number_format($item['sale'], 0, '', ',') . "₫" : number_format($item['price'], 0, '', ',') . "₫";
+                    echo "
+                                </span>
                             </span>      
                         </a>
                         <img src='{$item['image']}' alt='{$item['name']} {$item['pcode']}'>
@@ -119,16 +151,94 @@ function show_list_product_by_category($id, $cat)
                     ";
                 }
             }
-        } else {
-            foreach ($_SESSION['product'] as $item) {
+            echo "</div>";
+
+            echo "<div class='pagination'>";
+            if ($page > 1) {
+                $prePage = $page - 1;
+                echo "
+                <span class='prev'>
+                    <a href='?mod=posts&act=main&id={$id}&cat={$cat}&page={$prePage}'>
+                        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='1em' height='1em'>
+                            <path d='M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160zm352-160l-160 160c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L301.3 256 438.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0z' />
+                        </svg>
+                    </a>
+                </span>
+                ";
+            }
+
+            if ($page - 1 > 2)
+                echo "
+                <span class='page'><a href='?mod=posts&act=main&id={$id}&cat={$cat}&page=1'>1</a></span>
+
+                <span class='page page-node'>
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' width='1em' height='1em'>
+                        <path d='M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z' />
+                    </svg>
+                </span>
+                ";
+            else if ($page - 1 == 2)
+                echo "<span class='page'><a href='?mod=posts&act=main&id={$id}&cat={$cat}&page=1'>1</a></span>";
+
+            for ($i = max($page - 1, 1); $i <= min($page + 1, $totalPage); $i++) {
+                if ($i == $page)
+                    echo "<span class='page'><a class='current-page' href='?mod=posts&act=main&id={$id}&cat={$cat}&page={$i}'>{$i}</a></span>";
+                else
+                    echo "<span class='page'><a href='?mod=posts&act=main&id={$id}&cat={$cat}&page={$i}'>{$i}</a></span>";
+            }
+
+            if ($totalPage - $page > 2)
+                echo "
+                <span class='page page-node'>
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' width='1em' height='1em'>
+                        <path d='M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z' />
+                    </svg>
+                </span>
+
+                <span class='page'><a href='?mod=posts&act=main&id={$id}&cat={$cat}&page={$totalPage}'>{$totalPage}</a></span>
+                ";
+            else if ($totalPage - $page == 2)
+                echo "<span class='page'><a href='?mod=posts&act=main&id={$id}&cat={$cat}&page={$totalPage}'>{$totalPage}</a></span>";
+
+            if ($page < $totalPage) {
+                $nextPage = $page + 1;
+                echo "
+                <span class='next'>
+                    <a href='?mod=posts&act=main&id={$id}&cat={$cat}&page={$nextPage}'>
+                        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='1em' height='1em'>
+                            <path d='M470.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 256 265.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160zm-352 160l160-160c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L210.7 256 73.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0z' />
+                        </svg>
+                    </a>
+                </span>
+                ";
+            }
+            echo "</div>";
+        }
+        // Not contain cat
+        else {
+            $totalPost = db_num_rows("SELECT * FROM product as p WHERE p.id = $id");
+            $totalPage = ceil($totalPost / $quantityPerPage);
+
+            $start = ($page - 1) * $quantityPerPage;
+            $sql = "SELECT * FROM product as p WHERE p.id = $id LIMIT {$start}, {$quantityPerPage}";
+            $filter = db_fetch_array($sql);
+
+            echo "<div class='product-list hidden-bot'>";
+            foreach ($filter as $item) {
                 if ($item['id'] == $id) {
                     echo "
                     <div class='product'>
                     <div class='img'>
                         <a href='?mod=posts&act=detail&id={$id}&code={$item['pcode']}'>
-                            <span class='price'>";
-                        echo $item['sale'] ? number_format($item['sale'], 0, '', ',') . "₫" : number_format($item['price'], 0, '', ',') . "₫";
-                        echo "
+                            <span class='price'>
+                                <span>";
+                    echo $item['sale'] ? number_format($item['sale'], 0, '', ',') . "₫" : number_format($item['price'], 0, '', ',') . "₫";
+                    echo "
+                                </span>
+                                <span>";
+                    echo $item['sale'] ? number_format($item['sale'], 0, '', ',') . "₫" : number_format($item['price'], 0, '', ',') . "₫";
+                    echo "
+                                </span>
                             </span>      
                         </a>
                         <img src='{$item['image']}' alt='{$item['name']} {$item['pcode']}'>
@@ -140,32 +250,169 @@ function show_list_product_by_category($id, $cat)
                     ";
                 }
             }
-        }
-    } else {
-        $i = 0;
-        foreach ($_SESSION['product'] as $item) {
-            if ($i < 30) {
-                $i++;
+            echo "</div>";
 
+            echo "<div class='pagination'>";
+            if ($page > 1) {
+                $prePage = $page - 1;
                 echo "
-                <div class='product'>
-                <div class='img'>
-                    <a href='?mod=posts&act=detail&id=0&code={$item['pcode']}'>
-                        <span class='price'>";
-                    echo $item['sale'] ? number_format($item['sale'], 0, '', ',') . "₫" : number_format($item['price'], 0, '', ',') . "₫";
-                    echo "
-                        </span>  
+                <span class='prev'>
+                    <a href='?mod=posts&act=main&id={$id}&page={$prePage}'>
+                        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='1em' height='1em'>
+                            <path d='M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160zm352-160l-160 160c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L301.3 256 438.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0z' />
+                        </svg>
                     </a>
-                    <img src='{$item['image']}' alt='{$item['name']} {$item['pcode']}'>
-                </div>
-                <h3>" . mb_convert_case($item['name'], MB_CASE_UPPER) . "</h3>
-                <p>{$item['intro']}</p>
-                <a href='?mod=posts&act=detail&id=0&code={$item['pcode']}' class='btn'>View Details</a>
-                </div>
+                </span>
                 ";
             }
+
+            if ($page - 1 > 2)
+                echo "
+                <span class='page'><a href='?mod=posts&act=main&id={$id}&page=1'>1</a></span>
+    
+                <span class='page page-node'>
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' width='1em' height='1em'>
+                        <path d='M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z' />
+                    </svg>
+                </span>
+                ";
+            else if ($page - 1 == 2)
+                echo "<span class='page'><a href='?mod=posts&act=main&id={$id}&page=1'>1</a></span>";
+
+            for ($i = max($page - 1, 1); $i <= min($page + 1, $totalPage); $i++) {
+                if ($i == $page)
+                    echo "<span class='page'><a class='current-page' href='?mod=posts&act=main&id={$id}&page={$i}'>{$i}</a></span>";
+                else
+                    echo "<span class='page'><a href='?mod=posts&act=main&id={$id}&page={$i}'>{$i}</a></span>";
+            }
+
+            if ($totalPage - $page > 2)
+                echo "
+                <span class='page page-node'>
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' width='1em' height='1em'>
+                        <path d='M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z' />
+                    </svg>
+                </span>
+    
+                <span class='page'><a href='?mod=posts&act=main&id={$id}&page={$totalPage}'>{$totalPage}</a></span>
+                ";
+            else if ($totalPage - $page == 2)
+                echo "<span class='page'><a href='?mod=posts&act=main&id={$id}&page={$totalPage}'>{$totalPage}</a></span>";
+
+            if ($page < $totalPage) {
+                $nextPage = $page + 1;
+                echo "
+                <span class='next'>
+                    <a href='?mod=posts&act=main&id={$id}&page={$nextPage}'>
+                        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='1em' height='1em'>
+                            <path d='M470.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 256 265.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160zm-352 160l160-160c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L210.7 256 73.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0z' />
+                        </svg>
+                    </a>
+                </span>
+                ";
+            }
+            echo "</div>";
         }
     }
+    // Not contain id
+    else {
+        $totalPost = db_num_rows("SELECT * FROM product as p");
+        $totalPage = ceil($totalPost / $quantityPerPage);
+
+        $start = ($page - 1) * $quantityPerPage;
+        $sql = "SELECT * FROM product as p ORDER BY RAND() LIMIT {$start}, {$quantityPerPage}";
+        $filter = db_fetch_array($sql);
+
+        echo "<div class='product-list hidden-bot'>";
+        foreach ($filter as $item) {
+            echo "
+            <div class='product'>
+            <div class='img'>
+                <a href='?mod=posts&act=detail&id=0&code={$item['pcode']}'>
+                    <span class='price'>
+                        <span>";
+            echo $item['sale'] ? number_format($item['sale'], 0, '', ',') . "₫" : number_format($item['price'], 0, '', ',') . "₫";
+            echo "
+                        </span>
+                        <span>";
+            echo $item['sale'] ? number_format($item['sale'], 0, '', ',') . "₫" : number_format($item['price'], 0, '', ',') . "₫";
+            echo "
+                        </span>
+                    </span>  
+                </a>
+                <img src='{$item['image']}' alt='{$item['name']} {$item['pcode']}'>
+            </div>
+            <h3>" . mb_convert_case($item['name'], MB_CASE_UPPER) . "</h3>
+            <p>{$item['intro']}</p>
+            <a href='?mod=posts&act=detail&id=0&code={$item['pcode']}' class='btn'>View Details</a>
+            </div>
+            ";
+        }
+        echo "</div>";
+
+        echo "<div class='pagination'>";
+        if ($page > 1) {
+            $prePage = $page - 1;
+            echo "
+            <span class='prev'>
+                <a href='?mod=posts&act=main&page={$prePage}'>
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='1em' height='1em'>
+                        <path d='M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160zm352-160l-160 160c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L301.3 256 438.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0z' />
+                    </svg>
+                </a>
+            </span>
+            ";
+        }
+
+        if ($page - 1 > 2)
+            echo "
+            <span class='page'><a href='?mod=posts&act=main&page=1'>1</a></span>
+
+            <span class='page page-node'>
+                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' width='1em' height='1em'>
+                    <path d='M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z' />
+                </svg>
+            </span>
+            ";
+        else if ($page - 1 == 2)
+            echo "<span class='page'><a href='?mod=posts&act=main&page=1'>1</a></span>";
+
+        for ($i = max($page - 1, 1); $i <= min($page + 1, $totalPage); $i++) {
+            if ($i == $page)
+                echo "<span class='page'><a class='current-page' href='?mod=posts&act=main&page={$i}'>{$i}</a></span>";
+            else
+                echo "<span class='page'><a href='?mod=posts&act=main&page={$i}'>{$i}</a></span>";
+        }
+
+        if ($totalPage - $page > 2)
+            echo "
+            <span class='page page-node'>
+                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' width='1em' height='1em'>
+                    <path d='M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z' />
+                </svg>
+            </span>
+
+            <span class='page'><a href='?mod=posts&act=main&page={$totalPage}'>{$totalPage}</a></span>
+            ";
+        else if ($totalPage - $page == 2)
+            echo "<span class='page'><a href='?mod=posts&act=main&page={$totalPage}'>{$totalPage}</a></span>";
+
+        if ($page < $totalPage) {
+            $nextPage = $page + 1;
+            echo "
+            <span class='next'>
+                <a href='?mod=posts&act=main&page={$nextPage}'>
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='1em' height='1em'>
+                        <path d='M470.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 256 265.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160zm-352 160l160-160c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L210.7 256 73.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0z' />
+                    </svg>
+                </a>
+            </span>
+            ";
+        }
+        echo "</div>";
+    }
+
+    db_close();
 }
 
 //! =============== DETAILS ===============

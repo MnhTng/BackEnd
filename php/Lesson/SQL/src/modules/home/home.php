@@ -72,11 +72,29 @@ db_close();
         img.parentElement.addEventListener('mouseenter', () => {
             price.style.opacity = "1";
             price.style.backdropFilter = `brightness(0.6)`;
+
+            price.firstElementChild.style.transition = `all 0.3s ease-out`;
+            price.firstElementChild.style.opacity = `1`;
+            price.firstElementChild.style.transform = `translate(-50%, -50%)`;
+
+            price.lastElementChild.style.transition = `all 0.3s ease-out`;
+            price.lastElementChild.style.opacity = `1`;
+            price.lastElementChild.style.transform = `translate(-50%, -50%)`;
         });
 
         img.parentElement.addEventListener('mouseleave', () => {
             price.style.opacity = "0";
             price.style.backdropFilter = `brightness(1)`;
+
+            price.firstElementChild.style.transition = `all 0s`;
+            price.firstElementChild.style.opacity = `0`;
+            price.firstElementChild.style.transform = `translate(-50%, 400px)`;
+
+            price.lastElementChild.style.transform = `translate(-50%, -400px)`;
+            setTimeout(() => {
+                price.lastElementChild.style.transition = `all 0s`;
+                price.lastElementChild.style.transform = `translate(-50%, 400px)`;
+            }, 100);
         });
     });
 </script>

@@ -288,7 +288,6 @@ db_close();
         value.addEventListener("focus", () => {
             value.parentElement.firstElementChild.classList.add("active");
             value.parentElement.firstElementChild.style.color = `rgb(255, 65, 31)`;
-            value.parentElement.firstElementChild.style.textShadow = "0 0 1px #000, 0 0 1px #000, 0 0 2px #000, 0 0 2px #000";
             value.parentElement.style.border = "2px solid rgba(255, 255, 255, 0.7)";
             value.parentElement.style.boxShadow = "0 0 10px 2px rgba(255, 255, 255, 0.7)";
         });
@@ -297,12 +296,10 @@ db_close();
             if (value.value === "") {
                 value.parentElement.firstElementChild.classList.remove("active");
                 value.parentElement.firstElementChild.style.color = `#fff`;
-                value.parentElement.firstElementChild.style.textShadow = "0 0 1px #000, 0 0 3px #000, 0 0 3px #000, 0 0 6px #000";
                 value.parentElement.style.border = "2px solid transparent";
                 value.parentElement.style.boxShadow = "0 0 0 1px rgba(255, 255, 255, 0.7)";
             } else {
                 value.parentElement.firstElementChild.style.color = `rgb(255, 65, 31)`;
-                value.parentElement.firstElementChild.style.textShadow = "0 0 1px #000, 0 0 1px #000, 0 0 2px #000, 0 0 2px #000";
                 value.parentElement.style.border = "2px solid rgba(255, 255, 255, 0.7)";
                 value.parentElement.style.boxShadow = "0 0 10px 2px rgba(255, 255, 255, 0.7)";
             }

@@ -1,6 +1,5 @@
 <?php
 require "./src/layouts/header.php";
-require './src/controllers/cart/update.php';
 
 global $db;
 db_connect($db);
@@ -46,23 +45,6 @@ db_close();
                                 <path d="M566.6 54.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192-34.7-34.7c-4.2-4.2-10-6.6-16-6.6c-12.5 0-22.6 10.1-22.6 22.6l0 29.1L364.3 320l29.1 0c12.5 0 22.6-10.1 22.6-22.6c0-6-2.4-11.8-6.6-16l-34.7-34.7 192-192zM341.1 353.4L222.6 234.9c-42.7-3.7-85.2 11.7-115.8 42.3l-8 8C76.5 307.5 64 337.7 64 369.2c0 6.8 7.1 11.2 13.2 8.2l51.1-25.5c5-2.5 9.5 4.1 5.4 7.9L7.3 473.4C2.7 477.6 0 483.6 0 489.9C0 502.1 9.9 512 22.1 512l173.3 0c38.8 0 75.9-15.4 103.4-42.8c30.6-30.6 45.9-73.1 42.3-115.8z" />
                             </svg>
                         </div>
-
-                        <div class="alert-container">
-                            <div class="alert-remove">
-                                <h2>Remove all products</h2>
-                                <p>Are you sure you want to remove all items in your cart?</p>
-                                <div class="btn-group">
-                                    <div class="btn-cancel">
-                                        <span>Cancel</span>
-                                    </div>
-                                    <div class="btn-confirm">
-                                        <span>
-                                            <a href="./src/controllers/cart/delete.php?all=true">Remove</a>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -73,6 +55,7 @@ db_close();
                         $freeShip = 1;
                     $discount = 0;
 
+                    $i = 1;
                     foreach ($cartByID as $item) {
                         $cat = array_search($item['productType'], explode(', ', $_SESSION['category'][$item['productID'] - 1]['type']));
 
@@ -103,47 +86,34 @@ db_close();
                         }
                         echo "</div>";
 
-                        echo "<form action='' method='post' class='quantity'>";
-                        echo "<button type='submit' class='dec'>";
+                        $price = $item['sale'] ? $item['sale'] : $item['price'];
+                        echo "<form class='quantity'>";
+                        echo "<div class='dec'>";
                         echo "<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='5' stroke='currentColor' class='size-6' width='1em' height='1em'>";
                         echo "<path stroke-linecap='round' stroke-linejoin='round' d='M15.75 19.5 8.25 12l7.5-7.5' />";
                         echo "</svg>";
-                        echo "</button>";
-                        echo "<input class='quantity' type='number' name='quantity[{$item['pcode']}][{$item['size']}]' min='1' value='{$item['quantity']}'>";
-                        echo "<button type='submit' class='inc'>";
+                        echo "</div>";
+                        echo "<input class='quantity' type='number' id='stt{$i}' data-id='{$i}' data-code='{$item['pcode']}' data-size='{$item['size']}' data-price='{$price}' min='1' value='{$item['quantity']}'>";
+                        echo "<div class='inc'>";
                         echo "<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='5' stroke='currentColor' class='size-6' width='1em' height='1em'>";
                         echo "<path stroke-linecap='round' stroke-linejoin='round' d='m8.25 4.5 7.5 7.5-7.5 7.5' />";
                         echo "</svg>";
-                        echo "</button>";
+                        echo "</div>";
                         echo "</form>";
                         echo "</div>";
                         echo "</div>";
 
                         echo "<div class='cart-item-action'>";
-                        echo "<button class='btn-remove'>";
+                        echo "<button class='btn-remove' data-code='{$item['pcode']}' data-size={$item['size']}>";
                         echo "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' class='size-6' width='1.5em' height='1.5em'>";
                         echo "<path fill-rule='evenodd' d='M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z' clip-rule='evenodd' />";
                         echo "</svg>";
                         echo "</button>";
-                        echo "<div class='alert-container'>";
-                        echo "<div class='alert-remove'>";
-                        echo "<h2>Remove product</h2>";
-                        echo "<p>Are you sure you want to remove this item?</p>";
-                        echo "<div class='btn-group'>";
-                        echo "<div class='btn-cancel'>";
-                        echo "<span>Cancel</span>";
-                        echo "</div>";
-                        echo "<div class='btn-confirm'>";
-                        echo "<span>";
-                        echo "<a href='./src/controllers/cart/delete.php?code={$item['pcode']}&size={$item['size']}'>Remove</a>";
-                        echo "</span>";
                         echo "</div>";
                         echo "</div>";
                         echo "</div>";
-                        echo "</div>";
-                        echo "</div>";
-                        echo "</div>";
-                        echo "</div>";
+
+                        $i++;
                     }
                     ?>
                 </div>
@@ -288,23 +258,146 @@ db_close();
         });
     });
 
-    //! ========== Select Number Product ==========
-    let minus = document.querySelectorAll('.quantity>.dec');
-    let plus = document.querySelectorAll('.quantity>.inc');
+    //! ========== Ajax Handle ==========
+    $(document).ready(function() {
+        //! ========== Change Quantity Product ==========
+        $('.quantity>.dec').each(function() {
+            $(this).on('click', function() {
+                let load;
 
-    minus.forEach((value) => {
-        value.addEventListener('click', () => {
-            let number = value.nextElementSibling;
+                let id = $(this).next().attr('data-id');
+                let quantity = Math.max(parseInt($(this).next().val()) - 1, 1);
+                let code = $(this).next().attr('data-code');
+                let size = $(this).next().attr('data-size');
+                let price = $(this).next().attr('data-price');
+                let data = {
+                    id: id,
+                    quantity: quantity,
+                    code: code,
+                    size: size,
+                    price: price
+                };
 
-            if (number.value > 1)
-                number.value--;
+                $.ajax({
+                    url: './src/controllers/cart/update.php',
+                    method: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    beforeSend: function() {
+                        load = setTimeout(function() {
+                            $('.loading').css('display', 'flex');
+                        }, 500);
+                    },
+                    success: function(response) {
+                        $('.loading').css('display', 'none');
+                        clearTimeout(load);
+
+                        $("input#stt" + response.id).val(response.itemQuantity);
+                        $('.detail>div:first>span:last').text(response.total);
+                        $('.total-price span:last').text(response.finalTotal);
+                        $('.detail>div:last').html(response.freeShip);
+                        $('.sale-notify').html(response.discount);
+                        $('span.number-product').text(response.quantity);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(xhr.status);
+                        console.log(status);
+                        console.error(error);
+                    }
+                });
+            });
         });
-    });
 
-    plus.forEach((value) => {
-        value.addEventListener('click', () => {
-            let number = value.previousElementSibling;
-            number.value++;
+        $('.quantity>.inc').each(function() {
+            $(this).on('click', function() {
+                let load;
+
+                let id = $(this).prev().attr('data-id');
+                let quantity = parseInt($(this).prev().val()) + 1;
+                let code = $(this).prev().attr('data-code');
+                let size = $(this).prev().attr('data-size');
+                let price = $(this).prev().attr('data-price');
+                let data = {
+                    id: id,
+                    quantity: quantity,
+                    code: code,
+                    size: size,
+                    price: price
+                };
+
+                $.ajax({
+                    url: './src/controllers/cart/update.php',
+                    method: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    beforeSend: function() {
+                        load = setTimeout(function() {
+                            $('.loading').css('display', 'flex');
+                        }, 500);
+                    },
+                    success: function(response) {
+                        $('.loading').css('display', 'none');
+                        clearTimeout(load);
+
+                        $("input#stt" + response.id).val(response.itemQuantity);
+                        $('.detail>div:first>span:last').text(response.total);
+                        $('.total-price span:last').text(response.finalTotal);
+                        $('.detail>div:last').html(response.freeShip);
+                        $('.sale-notify').html(response.discount);
+                        $('span.number-product').text(response.quantity);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(xhr.status);
+                        console.log(status);
+                        console.error('Error: ', error);
+                    }
+                });
+            });
+        });
+
+        $('input.quantity').on('change input', function() {
+            let load;
+
+            let id = $(this).attr('data-id');
+            let quantity = parseInt($(this).val());
+            let code = $(this).attr('data-code');
+            let size = $(this).attr('data-size');
+            let price = $(this).attr('data-price');
+            let data = {
+                id: id,
+                quantity: quantity,
+                code: code,
+                size: size,
+                price: price
+            };
+
+            $.ajax({
+                url: './src/controllers/cart/update.php',
+                method: 'POST',
+                data: data,
+                dataType: 'json',
+                beforeSend: function() {
+                    load = setTimeout(function() {
+                        $('.loading').css('display', 'flex');
+                    }, 500);
+                },
+                success: function(response) {
+                    $('.loading').css('display', 'none');
+                    clearTimeout(load);
+
+                    $("input#stt" + response.id).val(response.itemQuantity);
+                    $('.detail>div:first>span:last').text(response.total);
+                    $('.total-price span:last').text(response.finalTotal);
+                    $('.detail>div:last').html(response.freeShip);
+                    $('.sale-notify').html(response.discount);
+                    $('span.number-product').text(response.quantity);
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.status);
+                    console.log(status);
+                    console.error(error);
+                }
+            });
         });
     });
 

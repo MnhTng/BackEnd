@@ -9,6 +9,34 @@ $(document).ready(function () {
     });
 });
 
+//! ========== Animation Header + Nav ==========
+
+$(document).ready(function () {
+    $('nav .brand').css({ 'transform': 'translateX(0)', 'opacity': '1', 'transition': 'all 1s ease-out' });
+    setTimeout(function () {
+        $('nav .brand').css('transition', 'all 0.2s ease-out');
+    }, 1000);
+
+    $('nav li').eq(0).css({ 'transform': 'translateX(0)', 'opacity': '1', 'transition': 'all 1s ease-out 0.15s' });
+    $('nav li').eq(1).css({ 'transform': 'translateX(0)', 'opacity': '1', 'transition': 'all 1s ease-out 0.3s' });
+    $('nav li').eq(2).css({ 'transform': 'translateX(0)', 'opacity': '1', 'transition': 'all 1s ease-out 0.45s' });
+    $('nav li').eq(3).css({ 'transform': 'translateX(0)', 'opacity': '1', 'transition': 'all 1s ease-out 0.6s' });
+    setTimeout(function () {
+        $('nav li').each(function () {
+            $(this).css('transition', '');
+        });
+    }, 1600);
+
+    $('nav #search-icon').css({ 'transform': 'translateX(0)', 'opacity': '1', 'transition': 'all 1s ease-out 0.75s' });
+    setTimeout(function () {
+        $('nav #search-icon').css('transition', '');
+    }, 1750);
+    $('nav .cart').css({ 'transform': 'translateX(0)', 'opacity': '1', 'transition': 'all 1s ease-out 0.9s' });
+    setTimeout(function () {
+        $('nav .cart').css('transition', '');
+    }, 1900);
+});
+
 //! ========== Keyframes Categories Bound ==========
 
 let categories = document.querySelectorAll(".product-list");

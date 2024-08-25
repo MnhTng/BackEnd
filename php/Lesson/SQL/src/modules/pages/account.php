@@ -1,8 +1,5 @@
 <?php
 require "./src/layouts/header.php";
-require "./src/controllers/client/avt.php";
-require "./src/controllers/client/avt2.php";
-require "./src/controllers/client/infoUpdate.php";
 
 if (session_status() == PHP_SESSION_NONE)
     session_start();
@@ -21,7 +18,7 @@ db_close();
         <div class="hidden-rotate acc-inner">
             <div class="acc-front">
                 <div class="acc-image">
-                    <form action="" method="post" enctype="multipart/form-data">
+                    <form enctype="multipart/form-data">
                         <label for="avt">
                             <img src='<?php if (empty($_SESSION['account']['avt'])) echo "./src/assets/images/no-avt.jpg";
                                         else echo $_SESSION['account']['avt']; ?>' alt="avatar">
@@ -32,14 +29,14 @@ db_close();
 
                         <span><?php echo $_SESSION['account']['username']; ?></span>
 
-                        <button type="submit" name="upload_avt">
+                        <button name="upload_avt">
                             <span>Upload</span>
                         </button>
                     </form>
                 </div>
 
                 <div class="acc-content">
-                    <div class="username">
+                    <div class="fullname">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6" width="2em" height="2em">
                             <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" />
                         </svg>
@@ -87,7 +84,7 @@ db_close();
 
             <div class="acc-back">
                 <div class="acc-content">
-                    <form action="" method="post">
+                    <form>
                         <div>
                             <label for="name">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6" width="2em" height="2em">
@@ -95,7 +92,7 @@ db_close();
                                 </svg>
                             </label>
 
-                            <input type="text" class="valid" id="name" name="name" minlength="2" pattern="^([a-zA-Záàảãạăắằẳẵặâấầẩẫậéèẻẽẹêềếểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưừứửữựýỳỷỹỵđ][\s\u0300-\u0303\u0323]*){2,32}$" placeholder="Name" autocomplete="off" spellcheck="false">
+                            <input type="text" class="valid" id="name" name="name" minlength="2" placeholder="Name" autocomplete="off" spellcheck="false">
                         </div>
 
                         <div>
@@ -109,7 +106,7 @@ db_close();
                                 <input type="radio" id="male" name="gender" value="male">
                                 <label class="escape" for="male">Male</label>
 
-                                <input type="radio" id="female" name="gender" value="male">
+                                <input type="radio" id="female" name="gender" value="female">
                                 <label class="escape" for="female">Female</label>
                             </div>
                         </div>
@@ -131,7 +128,7 @@ db_close();
                                 </svg>
                             </label>
 
-                            <input type="email" class="valid" id="email" name="email" pattern="^([A-Za-z0-9_]{6,32})@gmail(.[A-Za-z]{2,12})+$" placeholder="Email" autocomplete="off" spellcheck="false">
+                            <input type="email" class="valid" id="email" name="email" placeholder="Email" autocomplete="off" spellcheck="false">
                         </div>
 
                         <div>
@@ -141,28 +138,28 @@ db_close();
                                 </svg>
                             </label>
 
-                            <input type="tel" class="valid" id="phone" name="phone" pattern="^0[0-9]{9,11}$" placeholder="Phone Number" autocomplete="off" spellcheck="false">
+                            <input type="tel" class="valid" id="phone" name="phone" placeholder="Phone Number" autocomplete="off" spellcheck="false">
                         </div>
 
-                        <button type="submit" name="update_account" value="submit_update_account">Submit</button>
+                        <button type="submit" name="update_account">Submit</button>
                     </form>
 
                     <button class="flip-btn" onclick="flipForm()">User Info</button>
                 </div>
 
                 <div class="acc-image">
-                    <form action="" method="post" enctype="multipart/form-data">
-                        <label for="avt2">
+                    <form enctype="multipart/form-data">
+                        <label for="avt">
                             <img src='<?php if (empty($_SESSION['account']['avt'])) echo "./src/assets/images/no-avt.jpg";
                                         else echo $_SESSION['account']['avt']; ?>' alt="">
                             <div>Choose Image</div>
                         </label>
 
-                        <input type="file" id="avt2" name="avt2">
+                        <input type="file" id="avt" name="avt">
 
                         <span><?php echo $_SESSION['account']['username']; ?></span>
 
-                        <button type="submit" name="upload_avt2">
+                        <button name="upload_avt">
                             <span>Upload</span>
                         </button>
                     </form>
@@ -173,28 +170,10 @@ db_close();
 </main>
 
 <?php
-if (isset($error['avt'])) {
-    error_alert($error['avt']);
-}
-
-if (isset($alert['avt'])) {
-    success_alert($alert['avt']);
-}
-
-if (isset($error['update'])) {
-    error_alert($error['update']);
-}
-
-if (isset($alert['update'])) {
-    success_alert($alert['update']);
-}
-
-if (isset($alert['warning'])) {
-    warning_alert($alert['warning']);
-}
-
 require "./src/layouts/footer.php";
 ?>
+
+<script src="./src/controllers/client/validation.js"></script>
 
 <script>
     //! ========== Flip Form ==========
@@ -231,26 +210,138 @@ require "./src/layouts/footer.php";
         birthday.lastElementChild.classList.add('create');
     }
 
-    //! ========== Valid - Invalid Input ==========
-    let valid = document.querySelectorAll('.valid');
+    //! ========== Ajax Handle ==========
+    $(document).ready(function() {
+        //! ========== Change Avt ==========
+        $('input[type=file]').each(function() {
+            $(this).on('change', function() {
+                let avt = this.files[0];
+                let name = $(this).val().split('\\').pop();
+                let extension = name.split('.').pop();
 
-    valid.forEach((value) => {
-        value.addEventListener('focus', () => {
-            if (value.validity.valid)
-                value.style.boxShadow = `0 0 0 2px #0a7b5d`;
-            else
-                value.style.boxShadow = `0 0 0 2px #ff4000`;
+                let allowTypes = ['png', 'jpg', 'jpeg'];
+                if ($.inArray(extension, allowTypes) !== -1) {
+                    let allowSize = 1024 * 1024 * 20;
+
+                    if (avt.size > allowSize) {
+                        $('.alert-fixed').append(error_alert_jq("File allow accept the size image small than 20MB!"));
+
+                        close_alert_jq();
+                    } else {
+                        let formData = new FormData();
+                        formData.append('avt', avt);
+
+                        $.ajax({
+                            url: './src/controllers/client/avt.php',
+                            method: 'POST',
+                            data: formData,
+                            dataType: 'text',
+                            contentType: false,
+                            cache: false,
+                            processData: false,
+                            beforeSend: function() {
+                                $('.loading').css('display', 'flex');
+
+                            },
+                            success: function(response) {
+                                $('.loading').css('display', 'none');
+
+                                $('.alert-fixed').append(success_alert_jq("Change avatar success!"));
+
+                                close_alert_jq();
+
+                                $('.acc-image img').attr('src', response);
+                            },
+                            error: function(xhr, status, error) {
+                                console.log(xhr.status);
+                                console.log(status);
+                                console.log(error);
+                            }
+                        });
+                    }
+                } else {
+                    $('.alert-fixed').append(error_alert_jq("File allow accept the extend file: .png, .jpg, .jpeg!"));
+
+                    close_alert_jq();
+                }
+            });
         });
 
-        value.addEventListener('input', () => {
-            if (value.validity.valid)
-                value.style.boxShadow = `0 0 0 2px #0a7b5d`;
-            else
-                value.style.boxShadow = `0 0 0 2px #ff4000`;
+        $('.acc-image button').each(function() {
+            $(this).on('click', function(e) {
+                e.preventDefault();
+
+                $(this).parent().children(':first').trigger('click');
+            });
         });
 
-        value.addEventListener('blur', () => {
-            value.style.boxShadow = `0 0 0 2px #0a7b5d`;
+        //! ========== Update UserInfo ==========
+        $('.acc-back .acc-content form').on('submit', function(e) {
+            e.preventDefault();
+
+            let formData = $(this).serialize();
+            $.ajax({
+                url: './src/controllers/client/infoUpdate.php',
+                method: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.name) {
+                        for (let key in response) {
+                            $('.alert-fixed').append(error_alert_jq(response[key]));
+
+                            close_alert_jq();
+                        }
+                    }
+
+                    if (response.warning) {
+                        $('.alert-fixed').append(info_alert_jq(response.warning));
+
+                        close_alert_jq();
+                    }
+
+                    if (response.success) {
+                        $('.alert-fixed').append(success_alert_jq(response.success));
+
+                        close_alert_jq();
+
+                        for (let key in response.info) {
+                            $('.acc-front .acc-content').children("." + key).children('span').text(response.info[key]);
+                        }
+
+                        $('.acc-back .acc-content form input:not(input[type=radio])').val('');
+                        $('.acc-back .acc-content form input[type=radio]:checked').prop('checked', false);
+                        $('.acc-back .acc-content button.flip-btn').trigger('click');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.status);
+                    console.log(status);
+                    console.log(error);
+                },
+            });
+        });
+
+        //! ========== Valid - Invalid Input ==========
+        $('.valid').each(function() {
+            $(this).on('input focus', function() {
+                value = $(this).val();
+
+                if ($(this).attr('id') == 'name' && name_regex_jq(value))
+                    $(this).css('box-shadow', '0 0 0 2px #0a7b5d');
+                else if ($(this).attr('id') == 'date' && date_regex_jq(value))
+                    $(this).css('box-shadow', '0 0 0 2px #0a7b5d');
+                else if ($(this).attr('id') == 'email' && email_regex_jq(value))
+                    $(this).css('box-shadow', '0 0 0 2px #0a7b5d');
+                else if ($(this).attr('id') == 'phone' && phone_regex_jq(value))
+                    $(this).css('box-shadow', '0 0 0 2px #0a7b5d');
+                else
+                    $(this).css('box-shadow', '0 0 0 2px #ff4000');
+            });
+
+            $(this).on('blur', function() {
+                $(this).css('box-shadow', '0 0 0 2px #0a7b5d');
+            });
         });
     });
 </script>

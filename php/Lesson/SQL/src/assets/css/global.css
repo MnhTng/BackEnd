@@ -11,9 +11,7 @@ body {
     padding: 0;
     width: 100vw;
     height: 100vh;
-    background: linear-gradient(to bottom,
-            rgba(255, 255, 255),
-            rgba(0, 0, 0, 0.65));
+    background: #fff;
     background-attachment: fixed;
     overflow-x: hidden;
     overflow-y: auto;
@@ -38,7 +36,6 @@ body {
 *::-webkit-scrollbar-track {
     /* khu vực chứa thanh cuộn */
     background: #333;
-    border-radius: 1px;
 }
 
 *::selection {

@@ -10,8 +10,9 @@ if (isset($_GET['id']))
     $id = (int)$_GET['id'];
 if (isset($_GET['cat']))
     $cat = (int)$_GET['cat'];
+$page = isset($_GET['page']) ? $_GET['page'] : 1;
 
-global $id, $cat;
+global $id, $cat, $page;
 // ép kiểu int cho chuỗi không hợp lệ(bắt đầu không phải số) thì output = 0
 // id = 0 là trang chi tiết sản phẩm
 
@@ -71,30 +72,46 @@ db_close();
     </aside>
 
     <section>
-        <div class='product-list hidden-bot'>
-            <?php
-            show_list_product_by_category($id, $cat);
-            ?>
-        </div>
+        <h2 class="product hidden-right">Product</h2>
+        <?php
+        show_list_product_by_category($id, $cat, $page);
+        ?>
     </section>
 </main>
 
 <?php require "./src/layouts/footer.php"; ?>
 
 <script>
+    //! ========== Category Title ==========
+    let title = document.querySelector('h2.product');
+    let titleFocus = document.querySelector('.cate-focus-icon');
+
+    if (titleFocus)
+        title.textContent = titleFocus.textContent;
+    else
+        title.textContent = "Product";
+
+    //! ========== Sticky Category ==========
+    let cate = document.querySelector('.categories');
+    let productContent = document.querySelector('.product-list');
+
+    if (cate.offsetHeight > productContent.offsetHeight)
+        cate.style.position = `static`;
+    else
+        cate.style.position = `sticky`;
+
     //! ========== Show Dropdown ==========
-    let cateTitle = document.querySelectorAll('.sub');
+    $(document).ready(function() {
+        $('.sub').each(function() {
+            $(this).on('mouseenter', function() {
+                $(this).children().eq(0).children().eq(0).addClass('arrowSvg');
+                $(this).children().eq(1).stop().slideDown(500);
+            });
 
-    cateTitle.forEach((cate) => {
-        cate.addEventListener('mouseenter', () => {
-            cate.children[0].children[0].classList.add('arrowSvg');
-            cate.children[1].style.display = "block";
-
-        });
-
-        cate.addEventListener('mouseleave', () => {
-            cate.children[0].children[0].classList.remove('arrowSvg');
-            cate.children[1].style.display = "none";
+            $(this).on('mouseleave', function() {
+                $(this).children().eq(0).children().eq(0).removeClass('arrowSvg');
+                $(this).children().eq(1).stop().slideUp(300);
+            });
         });
     });
 
@@ -114,11 +131,29 @@ db_close();
         img.parentElement.addEventListener('mouseenter', () => {
             price.style.opacity = "1";
             price.style.backdropFilter = `brightness(0.6)`;
+
+            price.firstElementChild.style.transition = `all 0.3s ease-out`;
+            price.firstElementChild.style.opacity = `1`;
+            price.firstElementChild.style.transform = `translate(-50%, -50%)`;
+
+            price.lastElementChild.style.transition = `all 0.3s ease-out`;
+            price.lastElementChild.style.opacity = `1`;
+            price.lastElementChild.style.transform = `translate(-50%, -50%)`;
         });
 
         img.parentElement.addEventListener('mouseleave', () => {
             price.style.opacity = "0";
             price.style.backdropFilter = `brightness(1)`;
+
+            price.firstElementChild.style.transition = `all 0s`;
+            price.firstElementChild.style.opacity = `0`;
+            price.firstElementChild.style.transform = `translate(-50%, 400px)`;
+
+            price.lastElementChild.style.transform = `translate(-50%, -400px)`;
+            setTimeout(() => {
+                price.lastElementChild.style.transition = `all 0s`;
+                price.lastElementChild.style.transform = `translate(-50%, 400px)`;
+            }, 100);
         });
     });
 </script>

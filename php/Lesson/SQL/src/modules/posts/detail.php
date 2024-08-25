@@ -1,6 +1,9 @@
 <?php
 require "./src/layouts/header.php";
 
+if (session_status() == PHP_SESSION_NONE)
+    session_start();
+
 $mod = $_GET['mod'];
 $act = $_GET['act'];
 if (isset($_GET['id']))
@@ -11,9 +14,6 @@ if (isset($_GET['code']))
     $code = $_GET['code'];
 
 global $id, $cat, $code;
-
-require './src/controllers/cart/add.php';
-require './src/controllers/cart/buy.php';
 
 global $db;
 db_connect($db);
@@ -88,7 +88,7 @@ db_close();
                 }
                 echo "</div>";
 
-                echo "<form class='cart' action='' method='post' enctype='multipart/form-data'>";
+                echo "<form class='cart' enctype='multipart/form-data'>";
                 echo "<div class='size-table'>";
                 echo "<span>Size</span>";
                 echo "<div class='table'>";
@@ -141,13 +141,13 @@ db_close();
                 echo "</div>";
 
                 echo "<div class='product-act'>";
-                echo "<button type='submit' name='add_btn' value='submit_add_product' class='add'>";
+                echo "<button type='submit' name='add_btn' value='submit_add_product' data-code='{$item['pcode']}' class='add'>";
                 echo "<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor' class='size-6' width='2em' height='2em'>";
                 echo "<path stroke-linecap='round' stroke-linejoin='round' d='M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z' />";
                 echo "</svg>";
                 echo "<p>Add to cart</p>";
                 echo "</button>";
-                echo "<button type='submit' name='buy_btn' value='submit_buy_product' class='buy'>";
+                echo "<button type='submit' name='buy_btn' value='submit_buy_product' data-code='{$item['pcode']}' class='buy'>";
                 echo "<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor' class='size-6' width='2em' height='2em'>";
                 echo "<path stroke-linecap='round' stroke-linejoin='round' d='M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z' />";
                 echo "</svg>";
@@ -169,19 +169,6 @@ db_close();
 </main>
 
 <?php
-if (isset($error['login'])) {
-    warning_alert($error['login']);
-} else {
-    if (isset($error['size']))
-        error_alert($error['size']);
-    else if (isset($error['quantity']))
-        error_alert($error['quantity']);
-}
-
-if (isset($_POST['add_btn']) && isset($error) && empty($error)) {
-    success_alert("Add success!");
-}
-
 require "./src/layouts/footer.php";
 ?>
 
@@ -256,4 +243,89 @@ require "./src/layouts/footer.php";
             keyframeRuleEnd.style.transform = `translateY(calc((${numberThumb} * -${imageHeight}px) - (${numberThumb - 1} * 5px + 4px)))`;
         });
     }
+
+    //! ========== Ajax Handle ==========
+    $(document).ready(function() {
+        //! ========== Add Cart ==========
+        $('button[name=add_btn]').on('click', function() {
+            $('form.cart .product-act button').removeClass('click');
+
+            $(this).addClass('click');
+        });
+        $('button[name=buy_btn]').on('click', function() {
+            $('form.cart .product-act button').removeClass('click');
+
+            $(this).addClass('click');
+        });
+
+        $('form.cart').on('submit', function(e) {
+            e.preventDefault();
+            let load;
+
+            let formData = $(this).serialize();
+            let action = $('button.click').val();
+            let code = $('button.click').attr('data-code');
+            formData += "&action=" + action + "&code=" + code;
+
+            $.ajax({
+                url: './src/controllers/cart/add_buy.php',
+                type: 'POST',
+                dataType: 'json',
+                data: formData,
+                beforeSend: function() {
+                    load = setTimeout(function() {
+                        $('.loading').css('display', 'flex');
+                    }, 500);
+                },
+                success: function(response) {
+                    $('.loading').css('display', 'none');
+                    clearTimeout(load);
+
+                    if (response.login) {
+                        $('.alert-fixed').append(warning_alert_jq(response.login));
+
+                        close_alert_jq();
+                    }
+
+                    if (response.size) {
+                        $('.alert-fixed').append(error_alert_jq(response.size));
+
+                        close_alert_jq();
+                    }
+                    if (response.quantity) {
+                        $('.alert-fixed').append(error_alert_jq(response.quantity));
+
+                        close_alert_jq();
+                    }
+
+                    if (response.success) {
+                        if ($('span.number-product').length == 0) {
+                            let span = document.createElement('span');
+                            span.classList.add('number-product');
+                            span.textContent = response.number;
+                            document.querySelector(".cart>a.number-item").appendChild(span);
+                        } else
+                            $('span.number-product').text(response.number);
+
+                        $('.alert-fixed').append(success_alert_jq(response.success));
+
+                        close_alert_jq();
+                    }
+
+                    if (response.buy) {
+                        let redirect = document.createElement('a');
+                        redirect.href = "?mod=cart&act=checkout&code=" + response.code + "&size=" + response.size + "&quantity=" + response.quantity;
+                        document.body.appendChild(redirect);
+                        redirect.click();
+                        document.body.removeChild(redirect);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.status);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
+        });
+    });
 </script>

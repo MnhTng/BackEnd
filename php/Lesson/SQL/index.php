@@ -67,10 +67,11 @@ if (file_exists($path)) {
     if (isLogin) {
         loginButton.textContent = 'Logout';
         helloUser.innerHTML = `
-        <a href='?mod=pages&act=account'>Hello <b><i><u>${username}</u></i></b></a>
+        <a href='?mod=pages&act=account'>Hello <b><i>${username}</i></b></a>
         `;
     } else
         loginButton.textContent = 'Login';
 </script>
 
+<script src="./src/lib/alert.js"></script>
 <script src='./src/assets/js/app.js'></script>
