@@ -20,12 +20,12 @@ $sql = "SELECT * FROM cart";
 $_SESSION['cart'] = db_fetch_array($sql);
 
 if (isset($_SESSION['is_login']) && !empty($_SESSION['cart'])) {
-    $cartByID = array_filter($_SESSION['cart'], function ($item) {
-        return $item['id'] == $_SESSION['user_id'];
+    $cartByCheckout = array_filter($_SESSION['cart'], function ($item) {
+        return $item['id'] == $_SESSION['user_id'] && $item['checkout'] == 1;
     });
 
-    $_SESSION['quantity'] = array_sum(array_column($cartByID, "quantity"));
-    $_SESSION['total'] = array_sum(array_column($cartByID, "subtotal"));
+    $_SESSION['quantity'] = array_sum(array_column($cartByCheckout, "quantity"));
+    $_SESSION['total'] = array_sum(array_column($cartByCheckout, "subtotal"));
 }
 
 db_close();
@@ -147,7 +147,7 @@ db_close();
                             $freeShip = 1;
                         $discount = 0;
 
-                        foreach ($cartByID as $item) {
+                        foreach ($cartByCheckout as $item) {
                             echo "<div class='item'>";
                             echo "<img src='{$item['image']}' alt='product'>";
                             echo "<div class='info'>";

@@ -19,6 +19,8 @@ $_SESSION['category'] = db_fetch_array($sql);
 $sql = "SELECT * FROM cart";
 $_SESSION['cart'] = db_fetch_array($sql);
 
+$_SESSION['search'] = [];
+
 if (isset($_SESSION['is_login']) && !empty($_SESSION['cart'])) {
     $cartByID = array_filter($_SESSION['cart'], function ($item) {
         return $item['id'] == $_SESSION['user_id'];

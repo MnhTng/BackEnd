@@ -18,8 +18,12 @@ if (isset($_SESSION['is_login']) && !empty($_SESSION['cart'])) {
         return $item['id'] == $_SESSION['user_id'];
     });
 
-    $_SESSION['quantity'] = array_sum(array_column($cartByID, "quantity"));
-    $_SESSION['total'] = array_sum(array_column($cartByID, "subtotal"));
+    $cartByCheckout = array_filter($_SESSION['cart'], function ($item) {
+        return $item['id'] == $_SESSION['user_id'] && $item['checkout'] == 1;
+    });
+
+    $_SESSION['quantity'] = array_sum(array_column($cartByCheckout, "quantity"));
+    $_SESSION['total'] = array_sum(array_column($cartByCheckout, "subtotal"));
 }
 
 db_close();
@@ -61,7 +65,10 @@ db_close();
 
                         echo "<div class='cart-item'>";
                         echo "<div class='select-item'>";
-                        echo "<input type='checkbox' id='select-item' name='select[{$item['pcode']}][{$item['size']}]'>";
+                        if ($item['checkout'] == 1)
+                            echo "<input type='checkbox' id='select-item' data-code='{$item['pcode']}' data-size='{$item['size']}' checked>";
+                        else
+                            echo "<input type='checkbox' id='select-item' data-code='{$item['pcode']}' data-size='{$item['size']}'>";
                         echo "</div>";
 
                         echo "<div class='item-info'>";
@@ -80,7 +87,9 @@ db_close();
                         if ($item['sale']) {
                             echo "<span class='price-new'>" . number_format($item['sale'], 0, '', ',') . "₫</span>";
                             echo "<span class='price-old'>" . number_format($item['price'], 0, '', ',') . "₫</span>";
-                            $discount += ($item['price'] - $item['sale']) * $item['quantity'];
+
+                            if ($item['checkout'])
+                                $discount += ($item['price'] - $item['sale']) * $item['quantity'];
                         } else {
                             echo "<span class='price-new'>" . number_format($item['price'], 0, '', ',') . "₫</span>";
                         }
@@ -134,12 +143,19 @@ db_close();
 
                     <div>
                         <span>Shipping fee</span>
-                        <span>20,000₫</span>
+                        <span>
+                            <?php
+                            if (!empty($cartByCheckout))
+                                echo "20,000₫";
+                            else
+                                echo "0₫"
+                            ?>
+                        </span>
                     </div>
 
                     <div>
                         <?php
-                        if ($freeShip) {
+                        if ($_SESSION['total'] && $freeShip) {
                             echo "<span>Shipping discount</span>";
                             echo "<span class='discount'>-20,000₫</span>";
                         }
@@ -151,19 +167,21 @@ db_close();
                     <span>Total payment</span>
                     <span>
                         <?php
-                        if ($freeShip)
+                        if ($_SESSION['quantity'] && $freeShip)
                             echo number_format($_SESSION['total'], 0, '', ',') . "₫";
-                        else
+                        else if ($_SESSION['quantity'])
                             echo number_format((int)$_SESSION['total'] + 20000, 0, '', ',') . "₫";
+                        else
+                            echo "0₫";
                         ?>
                     </span>
                 </div>
 
                 <div class="sale-notify">
                     <?php
-                    if ($freeShip)
+                    if ($_SESSION['total'] && $freeShip)
                         echo "<span>You have saved " . number_format($discount + 20000, 0, '', ',') . "₫</span>";
-                    else if ($discount)
+                    else if ($_SESSION['total'] && $discount)
                         echo "<span>You have saved " . number_format($discount, 0, '', ',') . "₫</span>";
                     ?>
                 </div>
@@ -207,21 +225,59 @@ db_close();
     //! ========== Select - All Products In Cart ==========
     let selectAll = document.querySelector('input#select-all');
     let selectItem = document.querySelectorAll('input#select-item');
-    let clearAll = document.querySelector('.remove-all>.icon>svg');
+    let clear = document.querySelector('.remove-all>.icon>svg');
     let clearTitle = document.querySelector('.alert-remove>h2');
     let clearContent = document.querySelector('.alert-remove>p');
 
+    window.addEventListener('load', function() {
+        let checked = 0;
+        let count = selectItem.length;
+
+        selectItem.forEach((item) => {
+            if (item.checked)
+                checked++;
+        });
+
+        if (checked) {
+            clear.style.transform = `translateX(0)`;
+        } else {
+            clear.style.transform = `translateX(3em)`;
+        }
+
+        if (checked == count) {
+            selectAll.checked = true;
+
+            let disableCheckout = document.querySelector('a.checkout');
+            disableCheckout.style.pointerEvents = `auto`;
+            disableCheckout.style.background = `#000`;
+        } else {
+            selectAll.checked = false;
+
+            if (!checked) {
+                let disableCheckout = document.querySelector('a.checkout');
+                disableCheckout.style.pointerEvents = `none`;
+                disableCheckout.style.background = `rgba(0, 0 ,0 , 0.5)`;
+            }
+        }
+    });
+
     selectAll.addEventListener('change', () => {
         if (selectAll.checked) {
-            clearAll.style.transform = `translateX(0)`;
+            clear.style.transform = `translateX(0)`;
             clearTitle.textContent = `Remove all products`;
             clearContent.textContent = `Are you sure you want to remove all items in your cart?`;
+            let disableCheckout = document.querySelector('a.checkout');
+            disableCheckout.style.pointerEvents = `auto`;
+            disableCheckout.style.background = `#000`;
 
             selectItem.forEach((item) => {
                 item.checked = true;
             });
         } else {
-            clearAll.style.transform = `translateX(3em)`;
+            clear.style.transform = `translateX(3em)`;
+            let disableCheckout = document.querySelector('a.checkout');
+            disableCheckout.style.pointerEvents = `none`;
+            disableCheckout.style.background = `rgba(0, 0 ,0 , 0.5)`;
 
             selectItem.forEach((item) => {
                 item.checked = false;
@@ -229,10 +285,11 @@ db_close();
         }
     });
 
+    let check, count;
     selectItem.forEach((item) => {
         item.addEventListener('change', () => {
-            let check = 0;
-            let count = selectItem.length;
+            check = 0;
+            count = selectItem.length;
 
             selectItem.forEach((item) => {
                 if (item.checked) {
@@ -241,7 +298,11 @@ db_close();
             });
 
             if (check) {
-                clearAll.style.transform = `translateX(0)`;
+                clear.style.transform = `translateX(0)`;
+
+                let disableCheckout = document.querySelector('a.checkout');
+                disableCheckout.style.pointerEvents = `auto`;
+                disableCheckout.style.background = `#000`;
 
                 if (check == count) {
                     selectAll.checked = true;
@@ -253,13 +314,224 @@ db_close();
                     clearContent.textContent = `Are you sure you want to remove these items in your cart?`;
                 }
             } else {
-                clearAll.style.transform = `translateX(3em)`;
+                clear.style.transform = `translateX(3em)`;
+
+                let disableCheckout = document.querySelector('a.checkout');
+                disableCheckout.style.pointerEvents = `none`;
+                disableCheckout.style.background = `rgba(0, 0 ,0 , 0.5)`;
             }
+        });
+    });
+
+    //! ========== Remove Select - All Product ==========
+    clear.addEventListener('click', () => {
+        let deleteAlert = document.querySelector('.alert-container');
+
+        deleteAlert.style.transform = `translate(-50%, -50%)`;
+
+        let cancel = deleteAlert.querySelector('.btn-cancel');
+        cancel.addEventListener('click', () => {
+            deleteAlert.style.transform = `translate(100dvw, -50%)`;
         });
     });
 
     //! ========== Ajax Handle ==========
     $(document).ready(function() {
+        //! ========== Select Products In Cart ==========
+        $('input#select-item').each(function() {
+            $(this).on('change', function() {
+                let load;
+
+                if (check == count) {
+                    let data = {
+                        all: true
+                    };
+
+                    $.ajax({
+                        url: './src/controllers/cart/checkout.php',
+                        type: 'POST',
+                        data: data,
+                        dataType: 'json',
+                        beforeSend: function() {
+                            load = setTimeout(function() {
+                                $('.loading').css('display', 'flex');
+                            }, 500);
+                        },
+                        success: function(response) {
+                            $('.loading').css('display', 'none');
+                            clearTimeout(load);
+
+                            $('.detail>div:first>span:last').text(response.total);
+                            $('.total-price span:last').text(response.finalTotal);
+                            $('.detail>div:eq(1)>span:last').text('20,000₫');
+                            $('.detail>div:last').html(response.freeShip);
+                            $('.sale-notify').html(response.discount);
+                            $('input#select-all').attr('checked', 'checked');
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(xhr.status);
+                            console.log(status);
+                            console.log(error);
+                        },
+                    });
+                } else {
+                    let code = $(this).attr('data-code');
+                    let size = $(this).attr('data-size');
+                    let status = $(this).is(':checked') ? 1 : 0;
+                    let data = {
+                        code: code,
+                        size: size,
+                        status: status,
+                    };
+
+                    $.ajax({
+                        url: './src/controllers/cart/checkout.php',
+                        type: 'POST',
+                        data: data,
+                        dataType: 'json',
+                        beforeSend: function() {
+                            load = setTimeout(function() {
+                                $('.loading').css('display', 'flex');
+                            }, 500);
+                        },
+                        success: function(response) {
+                            $('.loading').css('display', 'none');
+                            clearTimeout(load);
+
+                            if (response.empty) {
+                                $('.detail>div:first>span:last').text('0₫');
+                                $('.total-price span:last').text('0₫');
+                                $('.detail>div:eq(1)>span:last').text('0₫');
+                                $('.detail>div:last').html('');
+                                $('.sale-notify').html('');
+                            } else {
+                                $('.detail>div:first>span:last').text(response.total);
+                                $('.total-price span:last').text(response.finalTotal);
+                                $('.detail>div:eq(1)>span:last').text('20,000₫');
+                                $('.detail>div:last').html(response.freeShip);
+                                $('.sale-notify').html(response.discount);
+                            }
+
+                            $('input#select-all').attr('checked', false);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(xhr.status);
+                            console.log(status);
+                            console.log(error);
+                        },
+                    });
+                }
+            });
+        });
+
+        //! ========== Select All In Cart ==========
+        $('input#select-all').on('change', function() {
+            let load;
+
+            if ($(this).is(':checked')) {
+                let data = {
+                    all: true
+                };
+
+                $.ajax({
+                    url: './src/controllers/cart/checkout.php',
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    beforeSend: function() {
+                        load = setTimeout(function() {
+                            $('.loading').css('display', 'flex');
+                        }, 500);
+                    },
+                    success: function(response) {
+                        $('.loading').css('display', 'none');
+                        clearTimeout(load);
+
+                        $('.detail>div:first>span:last').text(response.total);
+                        $('.total-price span:last').text(response.finalTotal);
+                        $('.detail>div:eq(1)>span:last').text('20,000₫');
+                        $('.detail>div:last').html(response.freeShip);
+                        $('.sale-notify').html(response.discount);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(xhr.status);
+                        console.log(status);
+                        console.log(error);
+                    },
+                });
+            } else {
+                let data = {
+                    all: false
+                };
+
+                $.ajax({
+                    url: './src/controllers/cart/checkout.php',
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    beforeSend: function() {
+                        load = setTimeout(function() {
+                            $('.loading').css('display', 'flex');
+                        }, 500);
+                    },
+                    success: function(response) {
+                        $('.loading').css('display', 'none');
+                        clearTimeout(load);
+
+                        $('.detail>div:first>span:last').text('0₫');
+                        $('.total-price span:last').text('0₫');
+                        $('.detail>div:eq(1)>span:last').text('0₫');
+                        $('.detail>div:last').html('');
+                        $('.sale-notify').html('');
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(xhr.status);
+                        console.log(status);
+                        console.log(error);
+                    },
+                });
+            }
+        });
+
+        //! ========== Remove Product ==========
+        $('.btn-remove').each(function() {
+            $(this).on('click', function() {
+                let code = $(this).attr('data-code');
+                let size = $(this).attr('data-size');
+
+                $('.alert-container h2').text('Remove item');
+                $('.alert-container p').text('Are you sure you want to remove this item in your cart?');
+                $('.alert-container .btn-confirm a').attr('href', './src/controllers/cart/delete.php?code=' + code + '&size=' + size);
+                $('.alert-container').css('transform', 'translate(-50%, -50%)');
+
+                $('.alert-container .btn-cancel').on('click', function() {
+                    $('.alert-container').css('transform', 'translate(100dvw, -50%)');
+                });
+            });
+        });
+
+        //! ========== Remove Select - All Product ==========
+        $('.remove-all>.icon>svg').on('click', function() {
+            if (check == count) {
+                $('.alert-container .btn-confirm a').attr('href', './src/controllers/cart/delete.php?all=true');
+            } else {
+                let codeSelect = [];
+                let sizeSelect = [];
+
+                $('.cart-item .select-item input').each(function() {
+                    if (this.checked) {
+                        let code = $(this).attr('data-code');
+                        let size = $(this).attr('data-size');
+
+                        codeSelect = [...codeSelect, code];
+                        sizeSelect = [...sizeSelect, size];
+                    }
+                });
+
+                $('.alert-container .btn-confirm a').attr('href', './src/controllers/cart/delete.php?code=' + codeSelect + '&size=' + sizeSelect);
+            }
+        });
+
         //! ========== Change Quantity Product ==========
         $('.quantity>.dec').each(function() {
             $(this).on('click', function() {
@@ -397,34 +669,6 @@ db_close();
                     console.log(status);
                     console.error(error);
                 }
-            });
-        });
-    });
-
-    //! ========== Remove Select - All Product ==========
-    clearAll.addEventListener('click', () => {
-        let deleteAlert = document.querySelector('.remove-all>.alert-container');
-
-        deleteAlert.style.transform = `translate(-50%, -50%)`;
-
-        let cancel = deleteAlert.querySelector('.btn-cancel');
-        cancel.addEventListener('click', () => {
-            deleteAlert.style.transform = `translate(100vw, -50%)`;
-        });
-    });
-
-    //! ========== Remove Product ==========
-    let deleteBtn = document.querySelectorAll('.btn-remove');
-
-    deleteBtn.forEach((removeBtn) => {
-        removeBtn.addEventListener('click', () => {
-            let deleteAlert = removeBtn.nextElementSibling;
-
-            deleteAlert.style.transform = `translate(-50%, -50%)`;
-
-            let cancel = deleteAlert.querySelector('.btn-cancel');
-            cancel.addEventListener('click', () => {
-                deleteAlert.style.transform = `translate(100vw, -50%)`;
             });
         });
     });

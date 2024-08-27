@@ -8,12 +8,17 @@ global $db;
 db_connect($db);
 
 $sql = "SELECT p.* FROM product AS p JOIN category AS c ON p.id = c.id";
-$SESSION['product'] = db_fetch_array($sql);
+$_SESSION['product'] = db_fetch_array($sql);
 
 $sql = "SELECT * FROM category";
-$SESSION['category'] = db_fetch_array($sql);
+$_SESSION['category'] = db_fetch_array($sql);
+
+$sql = "SELECT * FROM banner";
+$_SESSION['banner'] = db_fetch_array($sql);
 
 db_close();
+
+show_banner();
 ?>
 
 <main>
@@ -56,6 +61,54 @@ db_close();
 <?php require "./src/layouts/footer.php"; ?>
 
 <script>
+    //! ========== Banner ==========
+    let slider = document.querySelector('.banner .list');
+    let items = document.querySelectorAll('.banner .list .item');
+    let next = document.getElementById('next');
+    let prev = document.getElementById('prev');
+    let dots = document.querySelectorAll('.banner .dots li');
+
+    let lengthItems = items.length - 1;
+    let active = 0;
+
+    function reloadSlider() {
+        slider.style.left = -items[active].offsetLeft + 'px';
+        let last_active_dot = document.querySelector('.banner .dots li.active');
+        last_active_dot.classList.remove('active');
+        dots[active].classList.add('active');
+
+        clearInterval(refreshInterval);
+        refreshInterval = setInterval(() => {
+            next.click()
+        }, 5000);
+    }
+
+    window.addEventListener('resize', () => {
+        reloadSlider();
+    });
+
+    next.addEventListener('click', () => {
+        active = (active + 1) <= lengthItems ? active + 1 : 0;
+        reloadSlider();
+    });
+
+    prev.addEventListener('click', () => {
+        active = (active - 1) >= 0 ? active - 1 : lengthItems;
+        reloadSlider();
+    });
+
+    let refreshInterval = setInterval(() => {
+        next.click();
+    }, 5000);
+
+
+    dots.forEach((element, index) => {
+        element.addEventListener('click', () => {
+            active = index;
+            reloadSlider();
+        });
+    });
+
     //! ========== Show Product Price ==========
     let productImg = document.querySelectorAll('.img');
 
@@ -95,6 +148,12 @@ db_close();
                 price.lastElementChild.style.transition = `all 0s`;
                 price.lastElementChild.style.transform = `translate(-50%, 400px)`;
             }, 100);
+        });
+    });
+
+    $(document).ready(function() {
+        $('.banner a').on('click', function(e) {
+            e.preventDefault();
         });
     });
 </script>

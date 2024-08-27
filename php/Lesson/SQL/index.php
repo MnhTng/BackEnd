@@ -75,3 +75,45 @@ if (file_exists($path)) {
 
 <script src="./src/lib/alert.js"></script>
 <script src='./src/assets/js/app.js'></script>
+
+<script>
+    //! ========== Search ==========
+    $(document).ready(function() {
+        $('form.search').on('submit', function(e) {
+            e.preventDefault();
+            let load;
+
+            let result = $(this).find('input').val();
+            data = {
+                result: result
+            }
+
+            $.ajax({
+                url: './src/controllers/search.php',
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                beforeSend: function() {
+                    load = setTimeout(function() {
+                        $('.loading').css('display', 'flex');
+                    }, 500);
+                },
+                success: function(response) {
+                    $('.loading').css('display', 'none');
+                    clearTimeout(load);
+
+                    let nav = document.createElement('a');
+                    nav.setAttribute('href', '?mod=pages&act=search&search=' + response.search);
+                    document.body.appendChild(nav);
+                    nav.click();
+                    nav.remove();
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.status);
+                    console.log(status);
+                    console.log(error);
+                },
+            });
+        });
+    });
+</script>

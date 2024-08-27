@@ -346,6 +346,156 @@ header {
     z-index: 99;
 }
 
+/*? ================= BANNER ================= */
+
+.banner {
+    width: 100dvw;
+    height: 56dvh;
+    margin-bottom: 3em;
+    position: relative;
+    overflow: hidden;
+
+    .list {
+        width: max-content;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: flex;
+        transition: 1s;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    .buttons {
+        position: absolute;
+        top: 45%;
+        left: 5%;
+        width: 90%;
+        display: flex;
+        justify-content: space-between;
+
+        button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #fff5;
+            color: #0009;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease-out;
+
+            &:hover {
+                color: #000;
+                background: #fff;
+                cursor: pointer;
+            }
+
+            svg {
+                transition: all 0.2s ease-out;
+            }
+        }
+
+        #prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        #next:hover svg {
+            transform: translateX(3px);
+        }
+    }
+
+    ul.dots {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        bottom: 5%;
+        left: 50%;
+        transform: translateX(-50%);
+
+        li {
+            list-style: none;
+            width: 0.8em;
+            height: 0.8em;
+            background: #fff;
+            margin: 10px;
+            border-radius: 20px;
+            transition: 0.5s;
+            cursor: pointer;
+
+            &.active {
+                width: 3em;
+                height: 1em;
+                background: rgb(255, 60, 60);
+            }
+        }
+    }
+}
+
+/*? ================= SEARCH ================= */
+
+h2.search {
+    margin: 0;
+    padding: 0.5em 0;
+    text-align: center;
+}
+
+.search-empty {
+    width: 90dvw;
+    margin: auto;
+    background: #f5f5f5;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 1s;
+
+    a {
+        width: fit-content;
+        margin: 1em auto;
+        padding: 1em;
+        font-size: 1.5em;
+        background: #000;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+
+        svg {
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.35s ease-in-out;
+        }
+
+        p {
+            margin: 0;
+            transition: all 0.35s ease-in-out;
+        }
+
+        &:hover svg {
+            top: 50%;
+        }
+
+        &:hover p {
+            transform: translateY(150%);
+        }
+    }
+}
+
+
 /*! ================= MAIN ================= */
 
 main {
@@ -1968,6 +2118,7 @@ input[type=number] {
 
     .cart-total {
         grid-area: c;
+        min-width: 23em;
         height: fit-content;
         background: #f5f5f5;
         border-radius: 5px;
@@ -2163,6 +2314,7 @@ input[type=number] {
 
 .alert-container {
     width: 100dvw;
+    height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;

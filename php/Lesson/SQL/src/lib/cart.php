@@ -47,13 +47,15 @@ function add_cart($code, $sizeChose)
     }
 }
 
-function delete_item($code, $size)
+function delete_item($code, $size, $quantity)
 {
     global $db;
     db_connect($db);
 
-    $where = "id = {$_SESSION['user_id']} AND pcode = '{$code}' AND size = '{$size}'";
-    db_delete('cart', $where);
+    for ($i = 0; $i < $quantity; $i++) {
+        $where = "id = {$_SESSION['user_id']} AND pcode = '{$code[$i]}' AND size = '{$size[$i]}'";
+        db_delete('cart', $where);
+    }
 
     db_close();
 }

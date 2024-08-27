@@ -15,9 +15,9 @@ if (session_status() == PHP_SESSION_NONE)
 if (isset($_GET['all']))
     delete_cart();
 else {
-    $code = $_GET['code'];
-    $size = $_GET['size'];
-    delete_item($code, $size);
+    $code = explode(',', $_GET['code']);
+    $size = explode(',', $_GET['size']);
+    delete_item($code, $size, count($code));
 }
 
 ob_start();

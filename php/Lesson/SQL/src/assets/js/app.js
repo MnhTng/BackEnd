@@ -1,6 +1,6 @@
-//! ========== Click Link No Reload ==========
 
 $(document).ready(function () {
+    //! ========== Click Link No Reload ==========
     $('a').click(function () {
         if ($(this).attr('href') != '#') {
             window.location = $(this).attr('href');

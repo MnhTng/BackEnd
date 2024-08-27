@@ -29,7 +29,7 @@ if (isset($_POST['quantity'])) {
 
     db_update('cart', $data, $where);
 
-    $sql = "SELECT * FROM cart WHERE id = {$userID}";
+    $sql = "SELECT * FROM cart WHERE id = {$userID} AND checkout = 1";
     $result = db_fetch_array($sql);
 
     $_SESSION['quantity'] = array_sum(array_column($result, "quantity"));
@@ -44,8 +44,10 @@ if (isset($_POST['quantity'])) {
         $freeShip = "<span>Shipping discount</span><span class='discount'>-20,000₫</span>";
         $finalTotal = $_SESSION['total'];
         $discount += 20000;
-    } else
+    } else if ($_SESSION['quantity'])
         $finalTotal = (int)$_SESSION['total'] + 20000;
+    else
+        $finalTotal = 0;
 
     if ($discount)
         $discount = "<span>You have saved " . number_format($discount, 0, '', ',') . "₫</span>";
